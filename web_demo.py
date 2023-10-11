@@ -66,15 +66,22 @@ def reset_state():
     return [], [], None
 
 
+def reset_input(file,user_input):
+    yield gr.update(value='文件已上传，请开始聊天')
+
+
 with gr.Blocks() as demo:
-    gr.HTML("""<h1 align="center">ChatGLM2-6B</h1>""")
+    gr.HTML("""<h1 align="center">MemoryGPT</h1>""")
 
     chatbot = gr.Chatbot()
     with gr.Row():
         with gr.Column(scale=4):
+            with gr.Column(min_width=32, scale=1):
+                file = gr.File(file_count="single", file_types=["text", ".json", ".csv"])
             with gr.Column(scale=12):
-                user_input = gr.Textbox(show_label=False, placeholder="Input...", lines=10).style(
+                user_input = gr.Textbox(show_label=False, placeholder="Input...", lines=8).style(
                     container=False)
+                user_input.value = "请先上传文件"
             with gr.Column(min_width=32, scale=1):
                 submitBtn = gr.Button("Submit", variant="primary")
         with gr.Column(scale=1):
@@ -95,6 +102,9 @@ with gr.Blocks() as demo:
     submitBtn.click(reset_user_input, [], [user_input])
 
     emptyBtn.click(reset_state, outputs=[chatbot, history, past_key_values], show_progress=True)
+
+    file.upload(reset_input, inputs=[file, user_input], outputs=[user_input], show_progress=True)
+
 
 
 demo.queue().launch(share=False, inbrowser=True)
